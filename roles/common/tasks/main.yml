@@ -1,0 +1,81 @@
+---
+
+- name: Change hostname
+  hostname:
+    name: "{{ host_name }}"
+  when: ansible_hostname != host_name
+
+- name: Add to hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '^{{ inventory_hostname }}'
+    line: '{{ inventory_hostname }} {{ host_name }}.{{ domain_name }} {{ host_name }}'
+    state: present
+
+- name: Update apt
+  apt:
+    update_cache: yes
+    upgrade: dist
+
+- name: Install net-tools, ufw
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - ["net-tools","ufw","acl"]
+
+- name: Disable logging (UFW)
+  ufw:
+    logging: off
+
+- name: Allow SSH
+  ufw:
+    rule: limit
+    port: 22
+    proto: tcp
+
+- name: Default deny
+  ufw:
+    policy: deny
+    state: enabled
+
+- name: Enable color step one
+  replace:
+    path: "/root/.bashrc"
+    regexp: '^#(.*export LS.*)'
+    replace: '\1'
+
+- name: Enable color step two
+  replace:
+    path: "/root/.bashrc"
+    regexp: '^#(.*eval "`dir.*)'
+    replace: '\1'
+
+- name: Enable color step three
+  replace:
+    path: "/root/.bashrc"
+    regexp: '^#(.*alias l.*)'
+    replace: '\1'
+
+- name: Create appusers group
+  group:
+    name: appusers
+    state: present
+
+- name: Create srv directory
+  file:
+    path: "/srv"
+    state: directory
+
+- name: Create srv users directory
+  file:
+    path: "/srv/users"
+    state: directory
+
+- name: Create non_root_user
+  user:
+    name: "{{ non_root_user }}"
+    state: present
+    groups: appusers
+    append: yes
+    home: "/srv/users/{{ non_root_user }}"

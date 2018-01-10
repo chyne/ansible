@@ -1,0 +1,12 @@
+---
+- name: restart apache2
+  service:
+    name: apache2
+    state: restarted
+    enabled: yes
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes

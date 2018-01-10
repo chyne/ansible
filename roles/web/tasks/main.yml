@@ -1,0 +1,51 @@
+---
+
+- name: Install web packages
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: true
+  with_items:
+    - ["apache2","nginx","php-fpm","curl","libunwind8","gettext","apt-transport-https"]
+
+- name: Change apache2 ports.conf
+  template:
+    src: ports.conf
+    dest: /etc/apache2/ports.conf
+  notify: restart apache2
+
+- name: Create nginx directories
+  file:
+    path: "/etc/nginx/{{ item }}"
+    state: directory
+  with_items:
+    - ["core.d","events.d","http.d","ssl","vhosts.d"]
+
+- name: Remove unneeded nginx files and directories
+  file:
+    path: "/etc/nginx/{{ item }}"
+    state: absent
+  with_items:
+    - ["conf.d","sites-enabled","sites-available","snippets","proxy_params"]
+
+- name: Copy nginx.conf
+  template:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: Install Microsoft key
+  apt_key:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    state: present
+
+- name: Add Microsoft repository
+  apt_repository:
+    repo: "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-debian-stretch-prod stretch main"
+    state: present
+
+- name: Add dotnet
+  apt:
+    name: 'dotnet-sdk-2.0.0'
+    state: latest
+    update_cache: true

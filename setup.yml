@@ -1,0 +1,15 @@
+---
+
+- name: Common setup
+  hosts: all
+  remote_user: root
+
+  roles:
+    - common
+
+- name: Setup web servers
+  hosts: web
+  remote_user: root
+
+  roles:
+    - web
