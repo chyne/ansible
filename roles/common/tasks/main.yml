@@ -56,26 +56,3 @@
     path: "/root/.bashrc"
     regexp: '^#(.*alias l.*)'
     replace: '\1'
-
-- name: Create appusers group
-  group:
-    name: appusers
-    state: present
-
-- name: Create srv directory
-  file:
-    path: "/srv"
-    state: directory
-
-- name: Create srv users directory
-  file:
-    path: "/srv/users"
-    state: directory
-
-- name: Create non_root_user
-  user:
-    name: "{{ non_root_user }}"
-    state: present
-    groups: appusers
-    append: yes
-    home: "/srv/users/{{ non_root_user }}"

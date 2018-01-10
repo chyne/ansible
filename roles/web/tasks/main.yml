@@ -31,7 +31,13 @@
 - name: Copy nginx.conf
   template:
     src: nginx.conf
-    dest: /etc/nginx/nginx.conf
+    dest: /etc/nginx
+  notify: restart nginx
+
+- name: Copy default_backend.conf
+  template:
+    src: default_backend.conf
+    dest: /etc/nginx/http.d
   notify: restart nginx
 
 - name: Install Microsoft key
@@ -49,3 +55,28 @@
     name: 'dotnet-sdk-2.0.0'
     state: latest
     update_cache: true
+
+- name: Create appusers group
+  group:
+    name: appusers
+    state: present
+
+- name: Create srv directory
+  file:
+    path: "/srv"
+    state: directory
+
+- name: Create srv users directory
+  file:
+    path: "/srv/users"
+    state: directory
+
+- name: "Set default acl"
+  acl:
+    path: "{{ item }}"
+    entity: appusers
+    etype: group
+    permissions: x
+    state: present
+  with_items:
+    - ["/","/srv/","/srv/users"]

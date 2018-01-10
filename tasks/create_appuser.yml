@@ -1,0 +1,77 @@
+---
+
+- name: Create user {{ appuser }}
+  user:
+    name: "{{ appuser }}"
+    state: present
+    groups: appusers
+    append: yes
+    home: "/srv/users/{{ appuser }}"
+
+- name: Set acl on home directory
+  acl:
+    path: "/srv/users/{{ appuser }}"
+    entity: appusers
+    etype: group
+    permissions: ---
+    state: present
+
+- name: Create base user directories
+  file:
+    path: "/srv/users/{{ appuser }}/{{ item }}"
+    state: directory
+    owner: root
+    group: "{{ appuser }}"
+  with_items:
+    - ["apps","log"]
+
+- name: Create run directory
+  file:
+    path: "/srv/users/{{ appuser }}/run"
+    state: directory
+    owner: root
+    group: "{{ appuser }}"
+    mode: 0751
+
+- name: Create tmp directory
+  file:
+    path: "/srv/users/{{ appuser }}/tmp"
+    state: directory
+    owner: root
+    group: "{{ appuser }}"
+    mode: 0750
+
+- name: Set acl on apps
+  acl:
+    path: "/srv/users/{{ appuser }}/apps"
+    entity: "www-data"
+    etype: user
+    permissions: rx
+    default: yes
+    state: present
+
+- name: Set acl on apps
+  acl:
+    path: "/srv/users/{{ appuser }}/apps"
+    entity: "chyne"
+    etype: group
+    permissions: rwx
+    default: yes
+    state: present
+
+- name: Set acl on log
+  acl:
+    path: "/srv/users/{{ appuser }}/log"
+    entity: "chyne"
+    etype: user
+    permissions: rx
+    state: present
+
+- name: Set acl on log
+  acl:
+    path: "/srv/users/{{ appuser }}/log"
+    entity: "chyne"
+    etype: user
+    permissions: rx
+    default: yes
+    state: present

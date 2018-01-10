@@ -4,12 +4,15 @@
   hosts: all
   remote_user: root
 
-  roles:
-    - common
+#  roles:
+#    - common
 
 - name: Setup web servers
   hosts: web
   remote_user: root
 
-  roles:
-    - web
+#  roles:
+#    - web
+
+  tasks:
+  - include_tasks: tasks/create_appuser.yml appuser=chyne
